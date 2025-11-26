@@ -43,6 +43,9 @@ echo "***************************************"
 
 # Charger les modules kernel
 MODULES_CONF="/etc/modules-load.d/k8s.conf"
+
+sudo dnf install -y kernel-modules-extra-$(uname -r)
+
 if [ ! -f "$MODULES_CONF" ]; then
   echo -e "overlay\nbr_netfilter" | sudo tee "$MODULES_CONF"
 else
@@ -91,8 +94,12 @@ for module in ip_vs ip_vs_rr ip_vs_wrr ip_vs_sh; do
 done
 
 # socat requis pour kubelet (surtout pour CNI)
-sudo dnf install -y socat ipvsadm wget curl runc
+sudo dnf install -y epel-release
 
+sudo dnf install -y socat ipvsadm wget curl 
+
+sudo curl -Lo /usr/local/bin/runc https://github.com/opencontainers/runc/releases/latest/download/runc.amd64
+sudo chmod +x /usr/local/bin/runc
 
 
 
@@ -100,7 +107,7 @@ echo "🚢==============================================="
 echo "🚢 [Étape 1] Installation de containerd          "
 echo "🚢==============================================="
 
-CRI_VERSION="2.0.0"
+CRI_VERSION="2.2.0"
 ARCH="amd64"
 TMPDIR="/tmp/containerd-install"
 TARBALL="containerd-${CRI_VERSION}-linux-${ARCH}.tar.gz"
@@ -172,10 +179,10 @@ echo "☸️==============================================="
 cat <<EOF | sudo tee /etc/yum.repos.d/kubernetes.repo > /dev/null
 [kubernetes]
 name=Kubernetes
-baseurl=https://pkgs.k8s.io/core:/stable:/v1.33/rpm/
+baseurl=https://pkgs.k8s.io/core:/stable:/v1.34/rpm/
 enabled=1
 gpgcheck=1
-gpgkey=https://pkgs.k8s.io/core:/stable:/v1.33/rpm/repodata/repomd.xml.key
+gpgkey=https://pkgs.k8s.io/core:/stable:/v1.34/rpm/repodata/repomd.xml.key
 EOF
 
 # Installer kubelet, kubeadm, kubectl

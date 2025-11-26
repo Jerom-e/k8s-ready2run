@@ -32,6 +32,6 @@ resource "null_resource" "create_master" {
       
       ]
   }
-depends_on = [proxmox_vm_qemu.node3]
+depends_on = [proxmox_vm_qemu.node2]
 }
 

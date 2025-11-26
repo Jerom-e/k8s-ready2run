@@ -7,39 +7,43 @@ resource "proxmox_vm_qemu" "master" {
   full_clone   = true
   #system
   vmid       = var.id_master
-  cores      = 16
-  memory     = 16384
-  cpu        = "host"
+  memory     = 8192
+    
+  cpu   {
+  cores   = 4
+  sockets = 1
+  type    = "host"
+  }
+
+  
   os_type    = "cloud-init"
   tags       = "master"
+   
+  
   #boot option
   bootdisk   = "scsi0"
   pool = var.pool_k8s
+  
   # Configuration du disque
     #disk
-    disks {
-      scsi {
-      scsi0 {
-       disk {
-     size = var.size_stockage_cluster
-     storage = var.storage_cluster_k8s
-     format  = "raw"
-            }
-       } 
-      }
-      ide {
-        ide2 {
-          cloudinit {
-            storage = var.storage_cluster_k8s
-          }
-        }
-      }
-    
-    }
+  disk {
+    slot    = "scsi0"
+    size    = var.size_stockage_cluster
+    storage = var.storage_cluster_k8s
+    format  = "raw"
+  }
+
+  ### Cloud-init disk → doit être en ide2
+  disk {
+    slot    = "ide2"
+    type    = "cloudinit"
+    storage = var.storage_cluster_k8s
+  }
 
   # Configuration du réseau
 
   network {
+    id = 0
     model            = "virtio"
     bridge           = var.interfaces_clusters
     #tag              = var.interfaces_vlan_tag1 
